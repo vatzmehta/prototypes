@@ -1,5 +1,9 @@
 package main
 
+/*
+	STATUS: COMPLETE
+*/
+
 import (
 	"context"
 	"database/sql"
@@ -141,3 +145,35 @@ func tearDown(flightID int) {
 		println("Error tearing down flight:", err.Error())
 	}
 }
+
+/*
+What are Database Locks?
+
+Database locks are mechanisms through which a shared resources can be made safe in concurrent environment
+
+These are the different types of locks in mysql
+
+1. FOR UPDATE
+    1. When a SELECT query is ran with FOR UPDATE at the end, the row is locked until it is updated.
+    2. Any subsequent locking reads (FOR UPDATE or LOCK IN SHARE MODE) on the same row would wait on the first operation to complete. Plain SELECT reads use MVCC and do not block.
+    3. Once the first operation is complete, the row is re-read
+2. FOR UPDATE SKIP LOCKED
+    1. When a SELECT query is ran with FOR UPDATE SKIP LOCKED, if there are any locked rows that match the query, they are skipped from the results
+    2. This way the result set is subset of the actual set
+3. FOR UPDATE NOWAIT
+    1. When a SELECT query is ran with FOR UPDATE NOWAIT, it fetches the results based on the query and if there are any rows that are locked, it simply errors out immediately
+    2. This way can be employed when we want to achieve fail fast
+
+---
+
+### Row Locking Options in SQL
+
+| Aspect | FOR UPDATE (default) | FOR UPDATE SKIP LOCKED | FOR UPDATE NOWAIT |
+| --- | --- | --- | --- |
+| **Row is locked** | Wait (blocks) | Skip it, grab next | Fail immediately |
+| **Risk** | Deadlocks under high load | None | Caller must retry |
+| **Throughput** | Lower (blocking) | Higher (no waiting) | Depends on retry logic |
+| **Use case** | Serialized processing, retry-safe | Task queues, seat booking | Fast-fail + client retry |
+
+---
+*/
