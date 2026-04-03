@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"math"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
 // 100 Million
 const MAX_INT = 100000000
 
-var PrimeCount = 0
+var PrimeCount int32
 
 func checkPrime(n int, m *sync.Mutex) {
 
@@ -39,9 +40,10 @@ func checkPrime(n int, m *sync.Mutex) {
 		}
 	}
 
-	m.Lock()
-	PrimeCount++
-	m.Unlock()
+	// m.Lock()
+	// PrimeCount++
+	// m.Unlock()
+	atomic.AddInt32(&PrimeCount, 1)
 }
 
 func checkPrimeConcurrent(start, end int, m *sync.Mutex, wg *sync.WaitGroup) {
@@ -64,6 +66,7 @@ func main() {
 	}
 
 	wg.Wait()
+	// Answer should be 5,761,455
 	println("Total Prime Count: ", PrimeCount)
 	println("Time taken: ", time.Since(timeStart).Seconds())
 }
