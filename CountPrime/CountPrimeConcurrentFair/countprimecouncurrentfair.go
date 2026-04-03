@@ -3,17 +3,29 @@ package main
 import (
 	"fmt"
 	"math"
+	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/vatzmehta/prototypes/utils"
 )
 
-// 100 Million
+var PrimeCount int32
+var CurrentCounter int32
+
 const MAX_INT = 100000000
 
-var PrimeCount = 1
-
 func checkPrime(n int) {
+
+	if n <= 1 {
+		return
+	}
+
+	if n == 2 {
+		atomic.AddInt32(&PrimeCount, 1)
+		return
+	}
+
 	// return even numbers
 	if n&1 == 0 {
 		return
@@ -26,7 +38,21 @@ func checkPrime(n int) {
 		}
 	}
 
-	PrimeCount++
+	atomic.AddInt32(&PrimeCount, 1)
+}
+
+func doWork(wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	for {
+		x := atomic.AddInt32(&CurrentCounter, 1)
+		if x > MAX_INT {
+			break
+		}
+
+		checkPrime(int(x))
+	}
+
 }
 
 func main() {
@@ -34,10 +60,13 @@ func main() {
 	readings := utils.StartCPUMonitor(done)
 
 	timeStart := time.Now()
-	for i := 2; i < MAX_INT; i++ {
-		checkPrime(i)
+	wg := sync.WaitGroup{}
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go doWork(&wg)
 	}
 
+	wg.Wait()
 	close(done)
 	time.Sleep(10 * time.Millisecond)
 

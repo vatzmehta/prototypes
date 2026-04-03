@@ -6,6 +6,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/vatzmehta/prototypes/utils"
 )
 
 // 100 Million
@@ -47,15 +49,20 @@ func checkPrime(n int, m *sync.Mutex) {
 }
 
 func checkPrimeConcurrent(start, end int, m *sync.Mutex, wg *sync.WaitGroup) {
+	timeStart := time.Now()
 
 	for i := start; i < end; i++ {
 		checkPrime(i, m)
 	}
 
+	fmt.Printf("Thread with range %d:%d took %v\n", start, end, time.Since(timeStart))
 	wg.Done()
 }
 
 func main() {
+	done := make(chan struct{})
+	readings := utils.StartCPUMonitor(done)
+
 	timeStart := time.Now()
 	var m sync.Mutex
 	wg := sync.WaitGroup{}
@@ -66,7 +73,11 @@ func main() {
 	}
 
 	wg.Wait()
+	close(done)
+	time.Sleep(10 * time.Millisecond)
+
 	// Answer should be 5,761,455
-	println("Total Prime Count: ", PrimeCount)
-	println("Time taken: ", time.Since(timeStart).Seconds())
+	fmt.Println("Total Prime Count: ", PrimeCount)
+	fmt.Println("Time taken: ", time.Since(timeStart).Seconds())
+	utils.PrintCPUGraph(*readings)
 }
