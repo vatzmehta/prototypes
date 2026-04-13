@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        Test: <span id="test"> </span><br />
+    </body>
+
+    <script type="text/javascript">
+        const eventSrc = new EventSource("/events")
+
+        const test = document.getElementById("test")
+
+        eventSrc.addEventListener("test", (event) => {
+            test.textContent = event.data;
+        })
+    </script>
+</html>

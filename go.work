@@ -7,5 +7,6 @@ use (
 	./CountPrime
 	./CountPrime/CountPrimeConcurrent
 	./CountPrime/CountPrimeConcurrentFair
+	./ServerSideEvents
 	./utils
 )
