@@ -10,4 +10,5 @@ use (
 	./ServerSideEvents
 	./ConcurrentQueue
 	./utils
+	./Kafka
 )
